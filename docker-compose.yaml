@@ -1,60 +1,59 @@
 version: "3.9"
 
 networks:
-  smart_data_network:
+  cyl_data_network:
     driver: bridge # 專用於所有資料服務的內部網路
 
 services:
   # -----------------------------------------------------------------
   # 1. RDS/PostgreSQL 服務 (模擬關聯式資料庫 - 結構化資料)
   # -----------------------------------------------------------------
-  rds_postgres:
+  postgres:
     image: postgres:17 # 穩定且受 RDS 支援的版本
-    container_name: smart_postgres
+    container_name: cyl_postgres
     restart: always
     environment:
       # 關聯式資料庫連線資訊
-      POSTGRES_USER: smart_pg_user
-      POSTGRES_PASSWORD: smart_pg_pass
-      POSTGRES_DB: smart_patrol_db
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: Aa123456@
+      POSTGRES_DB: checkyourline # 容器啟動時自動創建這個名稱的資料庫
     ports:
-      - "5432:5432" # 開放給主機上的管理工具 (例如 DBeaver, PgAdmin)
+      - "5433:5432" # 開放給主機上的管理工具 (例如 DBeaver, PgAdmin)
     volumes:
       - postgres_data:/var/lib/postgresql/data # 資料持久化
     networks:
-      - smart_data_network
+      - cyl_data_network
 
   # -----------------------------------------------------------------
   # 2. MongoDB 服務 (文件資料庫 - 非結構化/彈性資料)
   # -----------------------------------------------------------------
   mongo:
     image: mongo:7.0 # 推薦 MongoDB 7.0 穩定版
-    container_name: smart_mongodb
+    container_name: cyl_mongodb
     restart: always
     environment:
       # MongoDB 管理員帳號設定 (用於初次啟動與驗證)
-      MONGO_INITDB_ROOT_USERNAME: smart_mongo_user
-      MONGO_INITDB_ROOT_PASSWORD: smart_mongo_pass
+      MONGO_INITDB_ROOT_USERNAME: dev
+      MONGO_INITDB_ROOT_PASSWORD: Aa123456@
     ports:
-      - "27017:27017" # MongoDB 預設埠口，開放給主機上的管理工具 (例如 Compass)
+      - "27018:27017" # MongoDB 預設埠口，開放給主機上的管理工具 (例如 Compass)
     volumes:
       - mongo_data:/data/db # 資料持久化
     networks:
-      - smart_data_network
-
+      - cyl_data_network
   # -----------------------------------------------------------------
   # 3. Redis 服務 (快取/訊息佇列 - 高速暫存資料)
   # -----------------------------------------------------------------
   redis:
     image: redis:7 # 推薦 Redis 7 穩定版
-    container_name: smart_redis
+    container_name: cyl_redis
     restart: always
     ports:
-      - "6379:6379" # Redis 預設埠口
+      - "6380:6379" # Redis 預設埠口
     volumes:
       - redis_data:/data # 資料持久化
     networks:
-      - smart_data_network
+      - cyl_data_network
 
 volumes:
   postgres_data:
